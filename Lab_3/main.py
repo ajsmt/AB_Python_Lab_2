@@ -75,7 +75,7 @@ def main():
     
     #группировки и агрегация
     print("\nгруппировка по целям: средняя сумма и срок кредита")
-    group_purpose = df.groupby("purpose")[["credit_amount", "duration"]].mean().round(1)
+    group_purpose = df.groupby(["purpose", "class"])[["credit_amount", "duration"]].mean().round(1)
     print(group_purpose.sort_values(by="credit_amount", ascending=False))
     
     print("\nгруппировка по классу риска (1=Good, 2=Bad):")
@@ -83,31 +83,35 @@ def main():
     print(group_class)
     
     print("\nгруппировка по кредитной истории (среднее число нынешних кредитов):")
-    history_group = df.groupby("credit_history")["existing_credits"].mean()
+    history_group = df.groupby(["credit_history", "class"])["existing_credits"].mean()
     print(history_group.sort_values(ascending=False))
     
     print("\nгруппировка по проценту рассрочки (средняя сумма кредита):")
-    rate_group = df.groupby("installment_rate")["credit_amount"].mean()
+    rate_group = df.groupby(["installment_rate", "class"])["credit_amount"].mean()
     print(rate_group)
     
     print("\nгруппировка по работе (средняя сумма кредита):")
-    job_group = df.groupby("job")["credit_amount"].mean().sort_values(ascending=False)
+    job_group = df.groupby(["job", "class"])["credit_amount"].mean().sort_values(ascending=False)
     print(job_group)
     
     print("\nгруппировка по типу имущества (средняя сумма кредита):")
-    prop_group = df.groupby("property")["credit_amount"].mean().sort_values(ascending=False)
+    prop_group = df.groupby(["property", "class"])["credit_amount"].mean().sort_values(ascending=False)
     print(prop_group)
     
     print("\nгруппировка по типу имущества (средний срок кредита):")
-    prop_dur_group = df.groupby("property")["duration"].mean().sort_values(ascending=False)
+    prop_dur_group = df.groupby(["property", "class"])["duration"].mean().sort_values(ascending=False)
     print(prop_dur_group)
+    
+    print("\nгруппировка средней длительность кредита в зависимости от Работы и Класса:")
+    job_dur_group = df.groupby(['job', 'class'])['duration'].mean().round(1).unstack()
+    print(job_dur_group)
     
     print("\n\n\n______4)Визуализация данных______")
 
     #barplot
     plt.figure(figsize=(10, 6))
     order_purpose = df.groupby("purpose")["credit_amount"].mean().sort_values(ascending=False).index
-    sns.barplot(x="credit_amount", y="purpose", data=df, order=order_purpose)
+    sns.barplot(x="credit_amount", y="purpose", data=df, order=order_purpose, hue="class", palette="deep")
     plt.title("средняя сумма кредита по целям кредита")
     plt.xlabel("mean credit_amount")
     plt.ylabel("purpose")
@@ -115,7 +119,7 @@ def main():
 
     #boxplot
     plt.figure(figsize=(8, 6))
-    sns.boxplot(data=df, x="class", y="credit_amount")
+    sns.boxplot(data=df, x="class", y="credit_amount", hue="class", palette="deep")
     plt.title('распределение сумм кредита для хороших (1) и плохих (2) типов заемщиков')
     plt.xlabel("class")
     plt.ylabel("credit_amount")
@@ -124,7 +128,7 @@ def main():
     #pointplot
     plt.figure(figsize=(10, 6))
     plt.title("зависимость суммы кредита от процента рассрочки")
-    sns.pointplot(data=df, x="installment_rate", y="credit_amount", capsize=.2)
+    sns.pointplot(data=df, x="installment_rate", y="credit_amount", capsize=.2, hue="class", palette="deep")
     plt.xlabel("installment_rate")
     plt.ylabel("credit_amount")
     plt.grid(True)
@@ -133,8 +137,22 @@ def main():
     #boxplot
     plt.figure(figsize=(10, 6))
     order_prop = df.groupby("property")["credit_amount"].mean().sort_values(ascending=False).index
-    sns.boxplot(data=df, x="property", y="credit_amount", order=order_prop)
+    sns.boxplot(data=df, x="property", y="credit_amount", order=order_prop, hue="class", palette="deep")
     plt.title("связь типа имущества и суммы кредита")
+    plt.show()
+    
+    #boxplot 
+    plt.figure(figsize=(10, 6))
+    order_prop_dur = df.groupby("property")["duration"].mean().sort_values(ascending=False).index
+    sns.boxplot(data=df, x="property", y="duration", order=order_prop_dur, hue="class", palette="deep")
+    plt.title("связь типа имущества и длительности кредита")
+    plt.show()
+
+    #boxplot
+    plt.figure(figsize=(10, 6))
+    order_job_dur = df.groupby("job")["duration"].mean().sort_values(ascending=False).index
+    sns.boxplot(data=df, x="job", y="duration", order=order_job_dur, hue="class", palette="deep")
+    plt.title("связь работы и длительности кредита")
     plt.show()
     
     print("\n\n\n______5)Работа с базой данных______")
