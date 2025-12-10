@@ -165,7 +165,7 @@ def main():
     
     #запросы к базе данных
     q1 = """
-    SELECT purpose, credit_amount, duration, age, job
+    SELECT purpose, credit_amount, duration, age, job, class
     FROM credits
     ORDER BY credit_amount DESC
     LIMIT 5
